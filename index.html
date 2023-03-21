@@ -230,14 +230,31 @@
     </script>
 </head>
 
+<style>
+    body {
+        display: flex;
+    }
+
+    .nas {
+        width: 50%;
+    }
+
+    .installfm {
+        width: 50%;
+    }
+</style>
+
 <body>
-    <div class="installfm">
-        <div id="loading" style="padding: 10px; color:#333; display:none; position:relative; text-align: center;">
-        </div>
+    <div class="nas">
+        <iframe src="http://192.168.31.218:8000/install/ps4/" width="100%" height="800" frameborder="0"></iframe>
+    </div>
+    
+    <div class="installfm" style="position: absolute; top: -160px; left: 700px; width: 300px; height: 600px;">
+        <div id="loading" style="padding: 10px; color:#333; display:none; position:relative; text-align: center;"></div>
 
         <span>PS4 IP：</span>
-        <p><input id="ps4ip" type="text" name="ps4ipaddr" maxlength=15 autocomplete="on" />
-        </p>
+        <p><input id="ps4ip" type="text" name="ps4ipaddr" maxlength=15 autocomplete="on" value="192.168.31.244" /></p>
+
 
         <span>操作类型：</span>
         <p>
@@ -256,9 +273,13 @@
         <!-- <p><input class="addurl" type="button" value="+" onclick="" /></p> -->
         <p><input id="fileurl" type="text" name="pkgfile" onfocus="this.value=''" autocomplete="off" /></p>
         <p><input class="commit" type="button" value="执行" onclick="check_input();" /></p>
-        <div class="copyright">by ERMAC</div>
-    </div>
+        <p style="text-align: center; line-height: 30px;"><span class="commit" style="font-size:12px;">复制左侧pkg链接，粘贴到操作内容</span></p>
 
+
+
+
+    </div>
 </body>
+
 
 </html>
