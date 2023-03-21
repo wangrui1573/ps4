@@ -246,8 +246,23 @@
 
 <body>
     <div class="nas">
-        <iframe src="http://192.168.31.218:8000/install/ps4/" width="100%" height="800" frameborder="0"></iframe>
+        <input type="text" id="iframeUrl" placeholder="请输入网址：）" style="width: 600px; padding: 8px; border: 2px solid #ccc; border-radius: 5px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);" value="http://192.168.31.218:8000/install/ps4/" />
+        <button onclick="loadIframe()" style="font-size: 15px; border: 2px solid #ccc; border-radius: 5px; padding: 5px 10px;">加载</button>
+
+        <br />
+        <iframe id="myIframe" src="http://192.168.31.218:8000/install/ps4/" width="100%" height="800" frameborder="0"></iframe>
     </div>
+    
+    <script type="text/javascript">
+    function loadIframe() {
+        var url = document.getElementById('iframeUrl').value;
+        if (url != "") {
+            document.getElementById("myIframe").src = url;
+        }
+    }
+    </script>
+    
+    
     
     <div class="installfm" style="position: absolute; top: -160px; left: 700px; width: 300px; height: 600px;">
         <div id="loading" style="padding: 10px; color:#333; display:none; position:relative; text-align: center;"></div>
@@ -274,7 +289,6 @@
         <p><input id="fileurl" type="text" name="pkgfile" onfocus="this.value=''" autocomplete="off" /></p>
         <p><input class="commit" type="button" value="执行" onclick="check_input();" /></p>
         <p style="text-align: center; line-height: 30px;"><span class="commit" style="font-size:12px;">复制左侧pkg链接，粘贴到操作内容</span></p>
-
 
 
 
