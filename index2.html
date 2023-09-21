@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS4 Remote PKG Installer</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            text-decoration: none;
+        }
+
+        body {
+            background: #f0f0f0;
+        }
+
+        .installfm {
+            padding: 30px;
+            position: relative;
+            left: 0px;
+            top: 300px;
+            right: 0px;
+            bottom: 0px;
+            margin: auto;
+            width: 300px;
+            min-height: 300px;
+            background: #eeeeee;
+            border: 1px solid #cccdcf;
+            border-radius: 15px;
+            font-size: 18px;
+            font-family: "PingFang SC";
+            font-weight: bolder;
+            color: #757575;
+        }
+
+        .installfm p {
+            margin-top: 6px;
+            margin-bottom: 20px;
+        }
+
+        .installfm input,
+        select {
+            box-sizing: border-box;
+            outline-style: none;
+            border: 1px solid #cccdcf;
+            border-radius: 8px;
+            padding: 7px 10px;
+            width: 300px;
+            font-size: 16px;
+            font-family: "PingFang SC";
+            color: #333;
+            box-shadow: inset 0 2px 3px #e8e8e8;
+        }
+
+        .installfm input:focus {
+            border-style: solid;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, .28);
+            border-color: rgba(223, 225, 229, 0);
+        }
+
+        .commit {
+            background: #f2f2f2;
+        }
+
+        .commit:hover {
+            background: #e9e9e9;
+        }
+
+        .commit:active {
+            background: #f2f2f2;
+        }
+
+        .copyright {
+            /* padding: 30px; */
+            text-align: center;
+            margin: auto;
+            font-size: 15px;
+            font-style: italic;
+            font-weight: 300;
+            font-family: "PingFang SC";
+            color: #a5a5a5;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function set_installfm_top() {
+            var userAgentInfo = navigator.userAgent;
+            var Agents = ["Android", "iPhone", "SymbianOS", "Windows Phone"
+                , "iPad", "iPod", "MIDP", "SymbianOS", "NOKIA", "SAMSUNG"
+                , "LG", "NEC", "TCL", "Alcatel", "BIRD", "DBTEL", "Dopod"
+                , "PHILIPS", "HAIER", "LENOVO", "MOT", "Nokia", "SonyEricsson"
+                , "SIE", "Amoi", "ZTE"];
+            var flag = true;
+            for (var v = 0; v < Agents.length; v++) {
+                if (userAgentInfo.indexOf(Agents[v]) > 0) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+            } else {
+                document.getElementsByTagName("div")[0].style.top = "0px";
+            }
+        }
+        window.onload = set_installfm_top;
+
+        function loading_message(str) {
+            var loadingdiv = document.getElementById("loading");
+            loadingdiv.innerHTML = str;
+            loadingdiv.style.display = '';
+            setTimeout(function () { loadingdiv.style.display = "none" }, 2000);
+        }
+
+        function post_api(url, obj, api_type) {
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.open('POST', url, true);
+            httpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            httpRequest.send(JSON.stringify(obj));
+
+            //连接loading
+            var loadingdiv = document.getElementById("loading");
+            loadingdiv.innerHTML = "PS4 连接中，请稍等...";
+            loadingdiv.style.display = '';
+            //执行操作
+            httpRequest.onreadystatechange = function () {
+                if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+                    loadingdiv.style.display = "none";
+
+                    var json = httpRequest.responseText;
+                    var data = (new Function("", "return" + json))();
+                    if (api_type == "install") {
+                        if (data["status"] == "success") {
+                            loading_message("开始安装 " + data["title"]);
+                            // alert("开始安装 " + data["title"] + " task id:" + data["task_id"]);
+                        } else if (data["status"] == "fail" && data["error_code"] == 2157510677) {
+                            loading_message("安装失败，已安装");
+
+                        } else {
+                            loading_message("错误，请检查输入的安装信息是否正确");
+                        }
+                    } else if (api_type == "is_exists") {
+                        if (data["exists"] == "true") {
+                            loading_message("已安装");
+
+                        } else if (data["exists"] == "false") {
+                            loading_message("未安装");
+                        } else {
+                            loading_message("错误，请检查输入的Title ID是否正确");
+                        }
+                    } else if (api_type == "uninstall_game" || api_type == "uninstall_patch" || api_type == "uninstall_ac" || api_type == "uninstall_theme") {
+                        if (data["status"] == "success") {
+                            loading_message("卸载成功");
+
+                        } else if (data["status"] == "fail" && data["error_code"] == 2157510660) {
+                            loading_message("卸载失败，该卸载内容不存在");
+                        } else {
+                            loading_message("错误，请检查输入的卸载信息是否正确");
+                        }
+                    }
+
+                    console.log(data);
+                } else if (httpRequest.status == 500) {
+                    loadingdiv.innerHTML = "错误，无法连接！";
+                    setTimeout(function () { loadingdiv.style.display = "none" }, 2000);
+                    console.log(data);
+                } else {
+                    loadingdiv.innerHTML = "PS4 连接超时";
+                    setTimeout(function () { loadingdiv.style.display = "none" }, 2000);
+                    console.log(data);
+                }
+            }
+        }
+
+        function check_input() {
+            var loadingdiv = document.getElementById("loading");
+
+            if (document.getElementById("ps4ip").value.length == 0) {
+                loading_message("请输入PS4 ip地址");
+                document.getElementById("ps4ip").focus();
+                return false;
+            }
+            if (document.getElementById("fileurl").value.length == 0) {
+                loading_message("请输入操作内容");
+                document.getElementById("fileurl").focus();
+                return false;
+            }
+            var api_type = document.getElementById("ps4api").value;
+            var url = 'http://' + document.getElementById("ps4ip").value + ':12801/api/' + api_type;
+            var pkgurl = document.getElementById("fileurl").value;
+            var obj = {};
+            var gamename = pkgurl.split("/")[4];
+            switch (api_type) {
+                case "is_exists":
+                    obj.title_id = pkgurl.toUpperCase();
+                    post_api(url, obj, api_type);
+                    break;
+                case "install":
+                    obj.type = "direct";
+                    var pkgarr = new Array();
+                    pkgarr = pkgurl.split(",");
+                    // pkgarr.push(pkgurl);
+                    obj.packages = pkgarr;
+                    post_api(url, obj, api_type);
+                    break;
+                case "uninstall_game":
+                    obj.title_id = pkgurl.toUpperCase();
+                    post_api(url, obj, api_type);
+                    break;
+                case "uninstall_patch":
+                    obj.title_id = pkgurl.toUpperCase();
+                    post_api(url, obj, api_type);
+                    break;
+                case "uninstall_ac":
+                    obj.content_id = pkgurl.toUpperCase();
+                    post_api(url, obj, api_type);
+                    break;
+                case "uninstall_theme":
+                    obj.content_id = pkgurl.toUpperCase();
+                    post_api(url, obj, api_type);
+                    break;
+                default:
+                    loading_message("请选择操作类型后执行");
+                    break;
+            }
+
+        }
+    </script>
+</head>
+
+<style>
+    body {
+        display: flex;
+    }
+
+    .nas {
+        width: 50%;
+    }
+
+    .installfm {
+        width: 50%;
+    }
+</style>
+
+<body>
+    <div class="nas">
+        <input type="text" id="iframeUrl" placeholder="请输入网址：）" style="width: 400px; padding: 8px; border: 2px solid #ccc; border-radius: 5px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);" value="http://192.168.31.218:8000/install/ps4/" />
+        <button onclick="loadIframe()" style="font-size: 15px; border: 2px solid #ccc; border-radius: 5px; padding: 5px 10px;">加载</button>
+
+        <br />
+        <iframe id="myIframe" src="http://192.168.31.218:8000/install/ps4/" width="100%" height="800" frameborder="0"></iframe>
+    </div>
+    
+    <script type="text/javascript">
+    function loadIframe() {
+        var url = document.getElementById('iframeUrl').value;
+        if (url != "") {
+            document.getElementById("myIframe").src = url;
+        }
+    }
+    </script>
+    
+    
+    
+    <div class="installfm" style="position: absolute; top: 10px; left: 700px; width: 300px; height: 600px;">
+        <div id="loading" style="padding: 10px; color:#333; display:none; position:relative; text-align: center;"></div>
+
+        <span>PS4 IP：</span>
+        <p><input id="ps4ip" type="text" name="ps4ipaddr" maxlength=15 autocomplete="on" value="192.168.31.248" /></p>
+
+
+        <span>操作类型：</span>
+        <p>
+            <select name="api" id="ps4api">
+                <option value="not_select">-- 选择操作类型 --</option>
+                <option value="is_exists">是否已安装（Title ID）</option>
+                <option value="install">安装PKG（Packages）</option>
+                <option value="uninstall_game">卸载游戏（Title ID）</option>
+                <option value="uninstall_patch">卸载补丁（Title ID）</option>
+                <option value="uninstall_ac">卸载DLC（Content ID）</option>
+                <option value="uninstall_theme">卸载主题（Content ID）</option>
+            </select>
+        </p>
+
+        <span>操作内容：</span>
+        <!-- <p><input class="addurl" type="button" value="+" onclick="" /></p> -->
+        <p><input id="fileurl" type="text" name="pkgfile" onfocus="this.value=''" autocomplete="off" /></p>
+        <p><input class="commit" type="button" value="执行" onclick="check_input();" /></p>
+        <p style="text-align: center; line-height: 30px;"><span class="commit" style="font-size:12px;">复制左侧pkg链接，粘贴到操作内容，目录和文件名不要有空格，容易失败</span></p>
+
+
+
+    </div>
+</body>
+
+
+</html>
